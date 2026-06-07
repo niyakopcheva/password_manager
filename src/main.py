@@ -1,10 +1,9 @@
-from modules.db import get_db_connection
+from modules.db import init_db
 
 def main():
-    conn = get_db_connection()
-    if conn:
-        print("Successfully connected to database!")
-        conn.close()
+    print("Starting Password Manager...")
+    init_db()
+    print("Application is ready.")
 
 if __name__ == "__main__":
     main()
