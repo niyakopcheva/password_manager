@@ -54,3 +54,36 @@ def init_db():
         finally:
             cursor.close()
             conn.close()
+
+
+def execute_query(query, params, fetch):
+    """
+    A generic handler to safely run SQL queries.
+    :param query: The SQL string to execute.
+    :param params: A tuple of variables to safely pass to the query (avoids SQL injection).
+    :param fetch: Set to True if you expect data back (like a SELECT statement).
+    """
+    result = None
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            if cursor:
+                cursor.execute(query, params or ())
+                
+                if fetch:
+                    result = cursor.fetchall()
+                else:
+                    conn.commit() 
+                    
+    except Exception as e:
+        print(f"Database Error: {e}")
+
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+        
+    return result
