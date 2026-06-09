@@ -1,6 +1,7 @@
 import os
 import hashlib
 import base64
+from cryptography.fernet import Fernet
 
 # Define how heavy we want the math to be
 ITERATIONS = 600000 
@@ -33,3 +34,14 @@ def generate_login_hash(master_key, login_salt):
     )
 
     return login_hash.hex()
+
+
+
+def encrypt_data(plaintext, master_key):
+    f = Fernet(master_key)
+    return f.encrypt(plaintext.encode('utf-8'))
+
+
+def decrypt_data(encrypted_text, master_key):
+    f = Fernet(master_key)
+    return f.decrypt(encrypted_text.decode('utf-8'))
