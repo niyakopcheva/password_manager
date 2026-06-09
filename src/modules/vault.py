@@ -1,5 +1,5 @@
 import psycopg2
-from modules.crypto import encrypt_data
+from modules.crypto import encrypt_data, decrypt_data
 from modules.db import execute_query
 
 class LoginCredentials:
@@ -37,3 +37,10 @@ def get_login_credentials(user_id):
     else:
         id, domain, associated_username, encrypted_pass = result[0]
         return LoginCredentials(id, domain, associated_username, encrypted_pass)
+
+
+def decrypt_password(encrypted_password, master_key):
+    if isinstance(encrypted_password, memoryview):
+        encrypted_password = bytes(encrypted_password)
+    decrypted_bytes = decrypt_data(encrypted_password, master_key)
+    return decrypted_bytes.decode('utf-8')
