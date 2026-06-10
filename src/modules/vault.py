@@ -35,8 +35,12 @@ def get_login_credentials(user_id):
     if not result: 
         return None
     else:
-        id, domain, associated_username, encrypted_pass = result[0]
-        return LoginCredentials(id, domain, associated_username, encrypted_pass)
+        logins = []
+        for login in result:
+            id, domain, associated_username, encrypted_pass = login
+            loginCreds = LoginCredentials(id, domain, associated_username, encrypted_pass)
+            logins.append(loginCreds)
+        return logins
 
 
 def decrypt_password(encrypted_password, master_key):

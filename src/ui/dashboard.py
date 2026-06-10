@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import customtkinter as ctk
+from modules.vault import get_login_credentials
 
 class Dashboard(ctk.CTk):
     def __init__(self, user):
@@ -33,6 +34,35 @@ class Dashboard(ctk.CTk):
         
         self.welcome_label = ctk.CTkLabel(self.main_content, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=32, weight="bold"))
         self.welcome_label.pack(pady=20, anchor="w")
+
+        self.passwords_frame = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
+        self.passwords_frame.pack(fill="both", expand=True)
+
+        self.load_passwords()
+
+    def load_passwords(self):
+        logins = get_login_credentials(self.user.id)
+        if not logins:
+            no_data_label = ctk.CTkLabel(self.passwords_frame, text="No passwords saved yet.", text_color="gray50")
+            no_data_label.pack(pady=10, anchor="w")
+            return
+            
+        for login in logins:
+            item_button = ctk.CTkButton(
+                self.passwords_frame, 
+                text=f"  {login.domain}", 
+                font=ctk.CTkFont(weight="bold", size=20), 
+                anchor="w",
+                width=400,
+                height=48,
+                text_color="#262626",
+                fg_color="#EDEDED",
+                hover_color="#FFD9AA",
+            )
+            item_button.pack(anchor="w", padx=20, pady=10)
+            
+            arrow_label = ctk.CTkLabel(item_button, text=">", font=ctk.CTkFont(weight="bold", size=20), text_color="#262626", bg_color="transparent", fg_color="transparent")
+            arrow_label.place(relx=0.95, rely=0.5, anchor="e")
 
     def handle_logout(self):
         from ui.login_screen import LoginWindow
