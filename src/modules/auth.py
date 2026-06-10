@@ -25,6 +25,9 @@ def get_new_user_credentials(username, password):
 
 
 def register(username, password):
+    user_already_exists = user_exists(username)
+    if user_already_exists:
+        raise InvalidCredentials("User already exists. Please choose a different username.")
     user = get_new_user_credentials(username, password)
     query = "INSERT INTO users (username, master_pass_hash, login_salt, vault_salt) VALUES (%s, %s, %s, %s);"
     execute_query(query, 
@@ -58,5 +61,10 @@ def login(username, password_input):
     else:
         raise InvalidCredentials("Invalid password.")
 
+
+def user_exists(username):
+    query = "SELECT id FROM users WHERE username = %s;"
+    result = execute_query(query, (username,), True)
+    return bool(result)
 
     

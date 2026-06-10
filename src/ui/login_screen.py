@@ -126,7 +126,7 @@ class LoginWindow(ctk.CTk):
             self.register_button.grid_forget()
             self.show_login_ui()
         except Exception as e:
-            self.error_label.configure(text=f"An unexpected error occurred: {e}")
+            self.error_label.configure(text=e)
 
 
 if __name__ == "__main__":
