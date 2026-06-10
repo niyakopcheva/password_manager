@@ -1,3 +1,4 @@
+import re
 import psycopg2
 from modules.crypto import generate_salt, derive_master_key, generate_login_hash
 from modules.db import execute_query
@@ -24,7 +25,21 @@ def get_new_user_credentials(username, password):
     return user
 
 
+def validate_password(password):
+    if len(password) < 12:
+        raise ValueError("Password must be at least 12 characters long.")
+    if not re.search(r"[A-Z]", password):
+        raise ValueError("Password must contain at least one uppercase letter.")
+    if not re.search(r"[a-z]", password):
+        raise ValueError("Password must contain at least one lowercase letter.")
+    if not re.search(r"\d", password):
+        raise ValueError("Password must contain at least one digit.")
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        raise ValueError("Password must contain at least one special character.")
+
+
 def register(username, password):
+    validate_password(password)
     user_already_exists = user_exists(username)
     if user_already_exists:
         raise InvalidCredentials("User already exists. Please choose a different username.")
