@@ -7,6 +7,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from modules.auth import login, register
 from modules.exceptions import InvalidCredentials
+from ui.dashboard import Dashboard
 
 class LoginWindow(ctk.CTk):
     def __init__(self):
@@ -20,7 +21,7 @@ class LoginWindow(ctk.CTk):
         self.grid_rowconfigure(0, weight=1) 
         self.grid_rowconfigure(11, weight=1) 
 
-        self.label = ctk.CTkLabel(self, text="Secure Vault Login", font=("Roboto", 24))
+        self.label = ctk.CTkLabel(self, text="Secure Vault\nLogin", font=("Roboto", 24))
         self.label.grid(row=1, column=0, padx=20, pady=10)
 
         # Username Input
@@ -49,7 +50,6 @@ class LoginWindow(ctk.CTk):
 
         # Info Paragraph
         self.info_label = ctk.CTkLabel(self, text="This master password is used to encrypt your vault.\nBecause we don't store it, it cannot be changed or recovered if lost.", text_color="gray50", font=("Roboto", 12))
-        # Hidden by default, only shown on register screen
 
         # Error Label
         self.error_label = ctk.CTkLabel(self, text="", text_color="#fd4141")
@@ -104,19 +104,22 @@ class LoginWindow(ctk.CTk):
             return
 
         try:
-
             user = login(username, password)
-            messagebox.showinfo("Success", f"Welcome back, {user.username}!")
-            # Here you would typically transition to the Vault screen
-            
         except InvalidCredentials as e:
             self.error_label.configure(text=str(e))
+            return
         except Exception as e:
             self.error_label.configure(text=f"An unexpected error occurred: {e}")
+            return
+            
+        # redirect to dashboard
+        self.destroy()
+        dashboard_app = Dashboard(user)
+        dashboard_app.mainloop()
 
     def show_register_ui(self):
         self.error_label.configure(text="")
-        self.label.configure(text="Secure Vault Register")
+        self.label.configure(text="Secure Vault\nRegister")
         self.username_entry.delete(0, ctk.END)
         self.password_entry.delete(0, ctk.END)
         self.login_button.grid_forget()
@@ -129,7 +132,7 @@ class LoginWindow(ctk.CTk):
         self.error_label.configure(text="")
         self.username_entry.delete(0, ctk.END)
         self.password_entry.delete(0, ctk.END)
-        self.label.configure(text="Secure Vault Login")
+        self.label.configure(text="Secure Vault\nLogin")
         self.info_label.grid_forget()
         self.register_button.grid_forget()
         self.login_button.grid(row=8, column=0, padx=20, pady=10)
@@ -157,7 +160,7 @@ class LoginWindow(ctk.CTk):
 
 
 if __name__ == "__main__":
-    ctk.set_appearance_mode("system")
+    ctk.set_appearance_mode("light")
     theme_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'theme.json'))
     ctk.set_default_color_theme(theme_path)
     app = LoginWindow()

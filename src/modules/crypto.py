@@ -3,7 +3,6 @@ import hashlib
 import base64
 from cryptography.fernet import Fernet
 
-# Define how heavy we want the math to be
 ITERATIONS = 600000 
 
 
@@ -16,7 +15,7 @@ def generate_salt():
 def derive_master_key(master_password, vault_salt):
     derived = hashlib.pbkdf2_hmac(
         'sha256',
-        bytes(master_password, 'utf-8'), # converts to bytes
+        bytes(master_password, 'utf-8'), 
         vault_salt,
         ITERATIONS
     )
