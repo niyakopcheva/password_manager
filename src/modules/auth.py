@@ -2,7 +2,7 @@ import re
 import psycopg2
 from modules.crypto import generate_salt, derive_master_key, generate_login_hash
 from modules.db import execute_query
-from modules.exceptions import InvalidCredentials
+from modules.exceptions import InvalidCredentials, UserAlreadyExists, UserDoesNotExist, InvalidPassword
 
 class UserCredentials:
     def __init__(self, id, username, master_pass_hash, login_salt, vault_salt, master_key=None):
@@ -42,7 +42,7 @@ def register(username, password):
     validate_password(password)
     user_already_exists = user_exists(username)
     if user_already_exists:
-        raise InvalidCredentials("User already exists. Please choose a different username.")
+        raise UserAlreadyExists("User already exists. Please choose a different username.")
     user = get_new_user_credentials(username, password)
     query = "INSERT INTO users (username, master_pass_hash, login_salt, vault_salt) VALUES (%s, %s, %s, %s);"
     execute_query(query, 
@@ -62,7 +62,7 @@ def login(username, password_input):
                   True
                   )
     if not result:
-        raise InvalidCredentials("User does not exist.")
+        raise UserDoesNotExist()
     
     user_id, master_pass_hash, login_salt, vault_salt = result[0]
 
@@ -74,7 +74,7 @@ def login(username, password_input):
         print("Access granted!")
         return UserCredentials(user_id, username, master_pass_hash, login_salt, vault_salt, computed_master_key)
     else:
-        raise InvalidCredentials("Invalid password.")
+        raise InvalidPassword()
 
 
 def user_exists(username):

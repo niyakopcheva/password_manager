@@ -43,4 +43,5 @@ def encrypt_data(plaintext, master_key):
 
 def decrypt_data(encrypted_text, master_key):
     f = Fernet(master_key)
-    return f.decrypt(encrypted_text.decode('utf-8'))
+    decrypted_bytes = f.decrypt(bytes(encrypted_text))
+    return decrypted_bytes.decode('utf-8')

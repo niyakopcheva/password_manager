@@ -5,14 +5,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import customtkinter as ctk
 from modules.vault import get_login_credentials
+from modules.auth import login
+from ui.credentials_popup import CredentialsPopup
+
+testuser = login("testUser", "testpass")
 
 class Dashboard(ctk.CTk):
-    def __init__(self, user):
+    def __init__(self, user=testuser):
         super().__init__()
 
         self.user = user
         self.title(f"Secure Vault - {self.user.username}")
         self.geometry("1280x720")
+
+        self.credentials_popup = None
 
         # Layout config
         self.grid_columnconfigure(1, weight=1)
@@ -22,6 +28,7 @@ class Dashboard(ctk.CTk):
         self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         
+        self.sidebar_frame.grid_rowconfigure(9, weight=1) # This row will expand and push the logout button to the bottom
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Secure\nVault", font=ctk.CTkFont(size=20, weight="bold"), justify="left", anchor="w")
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
 
@@ -32,13 +39,26 @@ class Dashboard(ctk.CTk):
         self.main_content = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.main_content.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
         
-        self.welcome_label = ctk.CTkLabel(self.main_content, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=32, weight="bold"))
-        self.welcome_label.pack(pady=20, anchor="w")
+        self.welcome_label = ctk.CTkLabel(self.main_content, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=24, weight="bold"))
+        self.welcome_label.pack(pady=20, padx=30, anchor="w")
 
         self.passwords_frame = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
         self.passwords_frame.pack(fill="both", expand=True)
 
         self.load_passwords()
+
+    def open_credentials_popup(self, login_credential):
+        if self.credentials_popup is not None and self.credentials_popup.winfo_exists():
+            self.credentials_popup.focus()
+            return
+        
+        self.credentials_popup = CredentialsPopup(
+            domain=login_credential.domain,
+            username=login_credential.associated_username,
+            encrypted_password=login_credential.encrypted_pass,
+            master_key=self.user.master_key
+        )
+        self.credentials_popup.grab_set()
 
     def load_passwords(self):
         logins = get_login_credentials(self.user.id)
@@ -58,10 +78,11 @@ class Dashboard(ctk.CTk):
                 text_color="#262626",
                 fg_color="#EDEDED",
                 hover_color="#FFD9AA",
+                command=lambda l=login: self.open_credentials_popup(l)
             )
             item_button.pack(anchor="w", padx=20, pady=10)
             
-            arrow_label = ctk.CTkLabel(item_button, text=">", font=ctk.CTkFont(weight="bold", size=20), text_color="#262626", bg_color="transparent", fg_color="transparent")
+            arrow_label = ctk.CTkLabel(item_button, text="▶", font=ctk.CTkFont(weight="bold", size=20), text_color="#262626", bg_color="transparent", fg_color="transparent")
             arrow_label.place(relx=0.95, rely=0.5, anchor="e")
 
     def handle_logout(self):
@@ -72,7 +93,7 @@ class Dashboard(ctk.CTk):
 
 
 if __name__ == "__main__":
-    ctk.set_appearance_mode("system")       
+    ctk.set_appearance_mode("light")       
     theme_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'theme.json'))
     ctk.set_default_color_theme(theme_path)
     app = Dashboard()
