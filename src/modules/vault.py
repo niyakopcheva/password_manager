@@ -61,3 +61,8 @@ def get_login_credentials(user_id):
             loginCreds = LoginCredentials(id, domain, associated_username, encrypted_pass)
             logins.append(loginCreds)
         return logins
+    
+
+def delete_login_credentials(credential_id):
+    query = "DELETE FROM passwords WHERE id = %s;"
+    execute_query(query, (credential_id,), fetch=False)

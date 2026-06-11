@@ -28,22 +28,32 @@ class Dashboard(ctk.CTk):
         self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         
-        self.sidebar_frame.grid_rowconfigure(9, weight=1) # This row will expand and push the logout button to the bottom
+        self.sidebar_frame.grid_rowconfigure(9, weight=1)
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Secure\nVault", font=ctk.CTkFont(size=20, weight="bold"), justify="left", anchor="w")
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
 
-        self.logout_button = ctk.CTkButton(self.sidebar_frame, text="Logout", command=self.handle_logout)
+        self.logout_button = ctk.CTkButton(self.sidebar_frame, text="Logout", command=self.handle_logout, text_color="gray10", fg_color="gray80", hover_color="gray60")
         self.logout_button.grid(row=10, column=0, padx=20, pady=20, sticky="s")
 
         # Main
         self.main_content = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.main_content.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+        self.main_content.grid_columnconfigure(0, weight=1)
+        self.main_content.grid_rowconfigure(1, weight=1)
+
+        # Header with Welcome and New Button
+        header_frame = ctk.CTkFrame(self.main_content, fg_color="transparent")
+        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 20), padx=10)
+        header_frame.grid_columnconfigure(0, weight=1)
         
-        self.welcome_label = ctk.CTkLabel(self.main_content, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=24, weight="bold"))
-        self.welcome_label.pack(pady=20, padx=30, anchor="w")
+        self.welcome_label = ctk.CTkLabel(header_frame, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=24, weight="bold"))
+        self.welcome_label.grid(row=0, column=0, sticky="w")
+
+        self.new_credential_button = ctk.CTkButton(header_frame, text="+ New", font=ctk.CTkFont(size=16, weight="bold"), width=100, height=50)
+        self.new_credential_button.grid(row=0, column=1, sticky="e", padx=40)
 
         self.passwords_frame = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
-        self.passwords_frame.pack(fill="both", expand=True)
+        self.passwords_frame.grid(row=1, column=0, sticky="nsew")
 
         self.load_passwords()
 

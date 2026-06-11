@@ -16,7 +16,7 @@ def main():
         user =login(username, passw)     # prints Access granted!
         # login("userNotExist", "testpass") # prints User not found!
         # login("testUser", "wrongpass")      # prints Invalid password
-        # add_login_credentials(user.id, "netflix", "test", "testest", user.master_key)
+        add_login_credentials(user.id, "netflix", "test", "testest", user.master_key)
         
         # Test fetching and decrypting
         saved_creds = get_login_credentials(user.id)

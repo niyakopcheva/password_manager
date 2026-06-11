@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from modules.crypto import decrypt_data
-from modules.vault import update_login_credentials
+from modules.vault import update_login_credentials, delete_login_credentials
 
 class CredentialsPopup(ctk.CTkToplevel):
     def __init__(self, credential_id, domain, username, encrypted_password, master_key, on_save_callback=None):
@@ -74,6 +74,9 @@ class CredentialsPopup(ctk.CTkToplevel):
         self.edit_save_button = ctk.CTkButton(actions_frame, text="Edit", width=100, command=self.toggle_edit_mode)
         self.edit_save_button.pack(side="left")
 
+        self.delete_button = ctk.CTkButton(actions_frame, text="Delete", width=100, command=self.handle_delete_credentials, text_color="gray10", fg_color="gray80", hover_color="red")
+        self.delete_button.pack(side="right")
+
     def _copy_to_clipboard(self, text_to_copy, button):
         self.clipboard_clear()
         self.clipboard_append(text_to_copy)
@@ -93,6 +96,8 @@ class CredentialsPopup(ctk.CTkToplevel):
         else:
             self.password_entry.configure(show="*")
 
+
+
     def toggle_edit_mode(self):
         if self.edit_save_button.cget("text") == "Edit":
             self.username_entry.configure(state="normal")
@@ -100,6 +105,8 @@ class CredentialsPopup(ctk.CTkToplevel):
             self.edit_save_button.configure(text="Save")
         else:
             self.save_changes()
+
+
 
     def save_changes(self):
         new_username = self.username_entry.get()
@@ -120,3 +127,10 @@ class CredentialsPopup(ctk.CTkToplevel):
         # Briefly show "Saved!" and then close the popup.
         self.edit_save_button.configure(text="Saved!", state="disabled")
         self.after(1000, self.destroy)
+
+
+    def handle_delete_credentials(self):
+        delete_login_credentials(self.credential_id)
+        if self.on_save_callback:
+            self.on_save_callback()
+        self.after(200, self.destroy)
