@@ -4,12 +4,15 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import customtkinter as ctk
+from tkinter import messagebox
 from modules.vault import get_login_credentials
 from modules.auth import login
 from ui.credentials_popup import CredentialsPopup
 from ui.new_login_popup import NewLoginPopup
 
 testuser = login("testUser", "testpass")
+
+SESSION_TIMEOUT = 10 * 60 * 1000
 
 class Dashboard(ctk.CTk):
     def __init__(self, user=testuser):
@@ -22,6 +25,7 @@ class Dashboard(ctk.CTk):
         self.credentials_popup = None
         self.new_login_popup = None
         self._search_debounce_job = None
+        self._session_timer = None
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -60,6 +64,10 @@ class Dashboard(ctk.CTk):
         self.passwords_frame.grid(row=1, column=0, sticky="nsew")
 
         self.load_passwords()
+
+        self._reset_session_timer()
+        self.bind_all("<KeyPress>", self._reset_session_timer)
+        self.bind_all("<Motion>", self._reset_session_timer)
 
     def open_credentials_popup(self, login_credential):
         if self.credentials_popup is not None and self.credentials_popup.winfo_exists():
@@ -123,7 +131,21 @@ class Dashboard(ctk.CTk):
             arrow_label = ctk.CTkLabel(item_button, text="▶", font=ctk.CTkFont(weight="bold", size=20), text_color="#262626", bg_color="transparent", fg_color="transparent")
             arrow_label.place(relx=0.95, rely=0.5, anchor="e")
 
+    def _reset_session_timer(self, event=None):
+        if self._session_timer:
+            self.after_cancel(self._session_timer)
+        self._session_timer = self.after(SESSION_TIMEOUT, self._session_timeout_logout)
+
+    def _session_timeout_logout(self):
+        if self._session_timer:
+            self.after_cancel(self._session_timer)
+            self._session_timer = None
+        messagebox.showinfo("Session Timeout", "You have been logged out due to inactivity.")
+        self.handle_logout()
+
     def handle_logout(self):
+        if self._session_timer:
+            self.after_cancel(self._session_timer)
         from ui.login_screen import LoginWindow
         self.destroy()
         login_win = LoginWindow()
