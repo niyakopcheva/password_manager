@@ -21,6 +21,7 @@ class Dashboard(ctk.CTk):
 
         self.credentials_popup = None
         self.new_login_popup = None
+        self._search_debounce_job = None
 
         # Layout config
         self.grid_columnconfigure(1, weight=1)
@@ -55,7 +56,7 @@ class Dashboard(ctk.CTk):
 
         self.search_bar = ctk.CTkEntry(header_frame, placeholder_text="Search by domain...", width=250)
         self.search_bar.grid(row=1, column=0, columnspan=1, sticky="w", pady=(10, 0))
-        self.search_bar.bind("<KeyRelease>", lambda event: self.load_passwords())
+        self.search_bar.bind("<KeyRelease>", self.debounce_search)
 
         self.passwords_frame = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
         self.passwords_frame.grid(row=1, column=0, sticky="nsew")
@@ -76,6 +77,11 @@ class Dashboard(ctk.CTk):
             on_save_callback=self.load_passwords
         )
         self.credentials_popup.grab_set()
+
+    def debounce_search(self, event=None):
+        if self._search_debounce_job:
+            self.after_cancel(self._search_debounce_job)
+        self._search_debounce_job = self.after(300, self.load_passwords)
 
     def load_passwords(self):
         # Clear existing password widgets before loading new ones
