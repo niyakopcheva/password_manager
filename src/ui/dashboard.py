@@ -7,6 +7,7 @@ import customtkinter as ctk
 from modules.vault import get_login_credentials
 from modules.auth import login
 from ui.credentials_popup import CredentialsPopup
+from ui.new_login_popup import NewLoginPopup
 
 testuser = login("testUser", "testpass")
 
@@ -19,6 +20,7 @@ class Dashboard(ctk.CTk):
         self.geometry("1280x720")
 
         self.credentials_popup = None
+        self.new_login_popup = None
 
         # Layout config
         self.grid_columnconfigure(1, weight=1)
@@ -28,12 +30,11 @@ class Dashboard(ctk.CTk):
         self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         
-        self.sidebar_frame.grid_rowconfigure(9, weight=1)
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Secure\nVault", font=ctk.CTkFont(size=20, weight="bold"), justify="left", anchor="w")
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="w")
 
         self.logout_button = ctk.CTkButton(self.sidebar_frame, text="Logout", command=self.handle_logout, text_color="gray10", fg_color="gray80", hover_color="gray60")
-        self.logout_button.grid(row=10, column=0, padx=20, pady=20, sticky="s")
+        self.logout_button.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
 
         # Main
         self.main_content = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -49,8 +50,12 @@ class Dashboard(ctk.CTk):
         self.welcome_label = ctk.CTkLabel(header_frame, text=f"{self.user.username}'s Vault", font=ctk.CTkFont(size=24, weight="bold"))
         self.welcome_label.grid(row=0, column=0, sticky="w")
 
-        self.new_credential_button = ctk.CTkButton(header_frame, text="+ New", font=ctk.CTkFont(size=16, weight="bold"), width=100, height=50)
+        self.new_credential_button = ctk.CTkButton(header_frame, text="+ New", font=ctk.CTkFont(size=16, weight="bold"), width=100, height=50, command=self.open_new_login_popup)
         self.new_credential_button.grid(row=0, column=1, sticky="e", padx=40)
+
+        self.search_bar = ctk.CTkEntry(header_frame, placeholder_text="Search by domain...", width=250)
+        self.search_bar.grid(row=1, column=0, columnspan=1, sticky="w", pady=(10, 0))
+        self.search_bar.bind("<KeyRelease>", lambda event: self.load_passwords())
 
         self.passwords_frame = ctk.CTkScrollableFrame(self.main_content, fg_color="transparent")
         self.passwords_frame.grid(row=1, column=0, sticky="nsew")
@@ -77,13 +82,29 @@ class Dashboard(ctk.CTk):
         for widget in self.passwords_frame.winfo_children():
             widget.destroy()
 
-        logins = get_login_credentials(self.user.id)
-        if not logins:
-            no_data_label = ctk.CTkLabel(self.passwords_frame, text="No passwords saved yet.", text_color="gray50")
+        all_logins = get_login_credentials(self.user.id)
+
+        # Get search term, check if search_bar exists to avoid error on initial load
+        search_term = ""
+        if hasattr(self, 'search_bar'):
+            search_term = self.search_bar.get().lower()
+
+        # Filter logins if there's a search term
+        if search_term:
+            filtered_logins = [login for login in all_logins if search_term in login.domain.lower()] if all_logins else []
+        else:
+            filtered_logins = all_logins
+
+        if not filtered_logins:
+            if not all_logins:
+                message = "No passwords saved yet."
+            else:
+                message = "No matching passwords found."
+            no_data_label = ctk.CTkLabel(self.passwords_frame, text=message, text_color="gray50")
             no_data_label.pack(pady=10, anchor="w")
             return
             
-        for login in logins:
+        for login in filtered_logins:
             item_button = ctk.CTkButton(
                 self.passwords_frame, 
                 text=f"  {login.domain}", 
@@ -106,6 +127,20 @@ class Dashboard(ctk.CTk):
         self.destroy()
         login_win = LoginWindow()
         login_win.mainloop()
+
+    
+    def open_new_login_popup(self):
+        if self.new_login_popup is not None and self.new_login_popup.winfo_exists():
+            self.new_login_popup.focus()
+            return
+
+        self.new_login_popup = NewLoginPopup(
+            user_id=self.user.id,
+            master_key=self.user.master_key,
+            on_save_callback=self.load_passwords
+        )
+        self.new_login_popup.grab_set()
+
 
 
 if __name__ == "__main__":
