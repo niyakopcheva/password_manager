@@ -28,6 +28,26 @@ def add_login_credentials(user_id, domain, username, plaintext_password, master_
     print(f"Successfully added secure record for {domain}!")
 
 
+
+def update_login_credentials(credential_id, domain, username, plaintext_password, master_key):
+    encrypted_password = encrypt_data(plaintext_password, master_key)
+
+    query = "UPDATE passwords SET domain = %s, associated_username = %s, encrypted_pass = %s WHERE id = %s;"
+
+    execute_query(
+        query,
+        (
+            domain,
+            username,
+            psycopg2.Binary(encrypted_password),
+            credential_id
+        ),
+        fetch=False
+    )
+    # print(f"Successfully updated secure record for {domain}!")
+
+
+
 def get_login_credentials(user_id):
     query = "SELECT id, domain, associated_username, encrypted_pass FROM passwords WHERE user_id = %s;"
     result = execute_query(query, (user_id,), fetch=True)
@@ -41,10 +61,3 @@ def get_login_credentials(user_id):
             loginCreds = LoginCredentials(id, domain, associated_username, encrypted_pass)
             logins.append(loginCreds)
         return logins
-
-
-def decrypt_password(encrypted_password, master_key):
-    if isinstance(encrypted_password, memoryview):
-        encrypted_password = bytes(encrypted_password)
-    decrypted_bytes = decrypt_data(encrypted_password, master_key)
-    return decrypted_bytes.decode('utf-8')

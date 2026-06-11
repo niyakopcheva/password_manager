@@ -53,14 +53,20 @@ class Dashboard(ctk.CTk):
             return
         
         self.credentials_popup = CredentialsPopup(
+            credential_id=login_credential.id,
             domain=login_credential.domain,
             username=login_credential.associated_username,
             encrypted_password=login_credential.encrypted_pass,
-            master_key=self.user.master_key
+            master_key=self.user.master_key,
+            on_save_callback=self.load_passwords
         )
         self.credentials_popup.grab_set()
 
     def load_passwords(self):
+        # Clear existing password widgets before loading new ones
+        for widget in self.passwords_frame.winfo_children():
+            widget.destroy()
+
         logins = get_login_credentials(self.user.id)
         if not logins:
             no_data_label = ctk.CTkLabel(self.passwords_frame, text="No passwords saved yet.", text_color="gray50")
