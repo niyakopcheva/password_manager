@@ -69,7 +69,6 @@ def login(username, password_input):
     computed_master_key = derive_master_key(password_input, bytes(vault_salt))
     computed_login_hash = generate_login_hash(computed_master_key, bytes(login_salt))
 
-    # Verification
     if computed_login_hash == master_pass_hash:
         print("Access granted!")
         return UserCredentials(user_id, username, master_pass_hash, login_salt, vault_salt, computed_master_key)

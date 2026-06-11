@@ -16,7 +16,6 @@ class LoginWindow(ctk.CTk):
         self.title("Password Manager - Login")
         self.geometry("1280x720")
 
-        # Layout config
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1) 
         self.grid_rowconfigure(11, weight=1) 
@@ -24,13 +23,11 @@ class LoginWindow(ctk.CTk):
         self.label = ctk.CTkLabel(self, text="Secure Vault\nLogin", font=("Roboto", 24))
         self.label.grid(row=1, column=0, padx=20, pady=10)
 
-        # Username Input
         self.username_label = ctk.CTkLabel(self, text="Username", width=250, anchor="w")
         self.username_label.grid(row=2, column=0, padx=20, pady=(5, 0))
         self.username_entry = ctk.CTkEntry(self, placeholder_text="Username", width=250)
         self.username_entry.grid(row=3, column=0, padx=20, pady=(0, 5))
 
-        # Password Input
         self.password_label = ctk.CTkLabel(self, text="Master Password", width=250, anchor="w")
         self.password_label.grid(row=4, column=0, padx=20, pady=(5, 0))
         
@@ -48,22 +45,17 @@ class LoginWindow(ctk.CTk):
             command=self.toggle_password_visibility)
         self.show_password_btn.grid(row=0, column=1, padx=(5, 0))
 
-        # Info Paragraph
         self.info_label = ctk.CTkLabel(self, text="This master password is used to encrypt your vault.\nBecause we don't store it, it cannot be changed or recovered if lost.", text_color="gray50", font=("Roboto", 12))
 
-        # Error Label
         self.error_label = ctk.CTkLabel(self, text="", text_color="#fd4141")
         self.error_label.grid(row=7, column=0, padx=20, pady=0)
 
-        # Login Button
         self.login_button = ctk.CTkButton(self, text="Login", command=self.handle_login)
         self.login_button.grid(row=8, column=0, padx=20, pady=10)
 
-        # -or- 
         self.or_label = ctk.CTkLabel(self, text="- or -", text_color=("gray50", "gray70"))
         self.or_label.grid(row=9, column=0, pady=(0, 10))
 
-        # Register Link
         self.register_link = ctk.CTkButton(
             self, 
             text="Register", 
@@ -75,7 +67,6 @@ class LoginWindow(ctk.CTk):
             )
         self.register_link.grid(row=10, column=0, padx=20, pady=(0, 10))
 
-        # Register Button
         self.register_button = ctk.CTkButton(
             self, 
             text="Register", 

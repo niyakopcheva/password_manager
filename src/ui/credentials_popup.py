@@ -120,11 +120,9 @@ class CredentialsPopup(ctk.CTkToplevel):
             master_key=self.master_key
         )
 
-        # Trigger the dashboard refresh
         if self.on_save_callback:
             self.on_save_callback()
 
-        # Briefly show "Saved!" and then close the popup.
         self.edit_save_button.configure(text="Saved!", state="disabled")
         self.after(1000, self.destroy)
 

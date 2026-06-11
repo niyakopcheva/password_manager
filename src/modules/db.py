@@ -57,12 +57,6 @@ def init_db():
 
 
 def execute_query(query, params, fetch):
-    """
-    A generic handler to safely run SQL queries.
-    :param query: The SQL string to execute.
-    :param params: A tuple of variables to safely pass to the query (avoids SQL injection).
-    :param fetch: Set to True if you expect data back (like a SELECT statement).
-    """
     result = None
     conn = None
     cursor = None

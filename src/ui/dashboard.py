@@ -23,7 +23,6 @@ class Dashboard(ctk.CTk):
         self.new_login_popup = None
         self._search_debounce_job = None
 
-        # Layout config
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -43,7 +42,6 @@ class Dashboard(ctk.CTk):
         self.main_content.grid_columnconfigure(0, weight=1)
         self.main_content.grid_rowconfigure(1, weight=1)
 
-        # Header with Welcome and New Button
         header_frame = ctk.CTkFrame(self.main_content, fg_color="transparent")
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 20), padx=10)
         header_frame.grid_columnconfigure(0, weight=1)
@@ -84,18 +82,15 @@ class Dashboard(ctk.CTk):
         self._search_debounce_job = self.after(300, self.load_passwords)
 
     def load_passwords(self):
-        # Clear existing password widgets before loading new ones
         for widget in self.passwords_frame.winfo_children():
             widget.destroy()
 
         all_logins = get_login_credentials(self.user.id)
 
-        # Get search term, check if search_bar exists to avoid error on initial load
         search_term = ""
         if hasattr(self, 'search_bar'):
             search_term = self.search_bar.get().lower()
 
-        # Filter logins if there's a search term
         if search_term:
             filtered_logins = [login for login in all_logins if search_term in login.domain.lower()] if all_logins else []
         else:
